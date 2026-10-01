@@ -1,0 +1,20 @@
+name: Privatplaner Bookeo Sync
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node sync.js
+        env:
+          PRIVATPLANER_EDIT_PASSWORD: ${{ secrets.PRIVATPLANER_EDIT_PASSWORD }}
