@@ -6,9 +6,12 @@
 //
 // Seit Oktober 2026 liegt unter privatplaner.snowboard-zellamsee.at das Privat-Portal (Startseite
 // mit Privatplaner + Privatkarten) - der Privatplaner selbst ist jetzt unter #/privatplaner.
+//
+// Seit 12.10.2026 prueft der Server das Passwort (Sitzungs-Cookie nur ueber https) und die Anmeldung
+// hat den Knopf "Öffnen" statt "Bereich freischalten".
 const { chromium } = require('playwright');
 
-const URL = process.env.PRIVATPLANER_URL || 'http://privatplaner.snowboard-zellamsee.at/#/privatplaner';
+const URL = process.env.PRIVATPLANER_URL || 'https://privatplaner.snowboard-zellamsee.at/#/privatplaner';
 const PASSWORD = process.env.PRIVATPLANER_EDIT_PASSWORD;
 
 (async () => {
@@ -40,12 +43,13 @@ const PASSWORD = process.env.PRIVATPLANER_EDIT_PASSWORD;
 
     console.log('Sperrabfrage erkannt - trage Passwort ein.');
     await passwordInput.fill(PASSWORD);
-    await page.getByRole('button', { name: 'Bereich freischalten' }).click();
-    await page.waitForTimeout(1000);
-    if (await page.getByText('Falsches Passwort').count() > 0) {
-      throw new Error('Falsches Passwort - bitte das GitHub-Secret PRIVATPLANER_EDIT_PASSWORD pruefen.');
+    await page.getByRole('button', { name: 'Öffnen' }).click();
+    // Entweder verschwindet die Anmeldung (ok) oder der Server meldet einen Fehler (Falsches Passwort, gesperrt ...)
+    const fehler = page.locator('.fb-fehler');
+    await Promise.race([passwordInput.waitFor({ state: 'detached', timeout: 20000 }), fehler.waitFor({ timeout: 20000 })]);
+    if (await fehler.count() > 0) {
+      throw new Error('Anmeldung abgelehnt: ' + (await fehler.innerText()) + ' - bitte das GitHub-Secret PRIVATPLANER_EDIT_PASSWORD pruefen.');
     }
-    await passwordInput.waitFor({ state: 'detached', timeout: 15000 });
     console.log('Freigeschaltet.');
 
     console.log('Warte auf automatischen Bookeo-Sync...');
