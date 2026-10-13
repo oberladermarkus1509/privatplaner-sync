@@ -2,9 +2,9 @@ name: Privatplaner Bookeo Sync
 
 on:
   schedule:
-    # Alle 10 Minuten. GitHub garantiert dieses Timing nicht exakt (kann sich je nach
+    # Alle 30 Minuten. GitHub garantiert dieses Timing nicht exakt (kann sich je nach
     # Auslastung um ein paar Minuten verschieben) - fuer diesen Zweck unproblematisch.
-    - cron: '*/10 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch: {}
 
 jobs:
