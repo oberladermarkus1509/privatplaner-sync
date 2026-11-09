@@ -4,7 +4,7 @@ on:
   schedule:
     # Alle 30 Minuten. GitHub garantiert dieses Timing nicht exakt (kann sich je nach
     # Auslastung um ein paar Minuten verschieben) - fuer diesen Zweck unproblematisch.
-    - cron: '*/30 * * * *'
+    - cron: '13,43 * * * *'
   workflow_dispatch: {}
 
 jobs:
